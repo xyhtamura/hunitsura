@@ -1,756 +1,802 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HuníTsura</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Averia+Sans+Libre:wght@700&display=swap');
-        
-        body {
-            background-color: #303030;
-            color: #cccac6;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        
-        .title-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .title {
-            font-family: 'Averia Sans Libre', cursive;
-            font-size: 3em;
-            margin-bottom: 5px;
-            background: linear-gradient(45deg, #6e45e2, #88d3ce, #b3f7f3, #6e45e2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .subtitle {
-            font-family: 'Averia Sans Libre', cursive;
-            font-size: 1.2em;
-            color: #666;
-            margin: 0;
-        }
-        
-        .controls {
-            margin: 20px 0;
-            padding: 20px;
-            background: #202020;
-            border-radius: 8px;
-            text-align: center;
-            width: calc(100% - 40px);
-        }
-        
-        .visualizer-container {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            border: 2px dashed #ccc;
-            overflow: hidden;
-            background: #202020;
-            transition: all 0.3s ease;
-        }
-        
-        /* Full-window mode styles */
-        body.window-mode {
-            padding: 0;
-        }
-        
-        body.window-mode .container {
-            max-width: none;
-            width: 100%;
-            padding: 0;
-        }
-        
-        body.window-mode .visualizer-container {
-            width: 100vw;
-            height: calc(100vh - 60px);
-            border: none;
-            border-radius: 0;
-        }
-        
-        body.window-mode .controls {
-            display: none;
-        }
-        
-        body.window-mode .title-container {
-            display: none;
-        }
-        
-        #image1 {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background-color: black;
-        }
-        
-        #image2 {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background-color: white;
-            opacity: 0;
-        }
-        
-        .drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            background: #202020;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-        
-        .drop-area.drag-over {
-            border-color: #4a90e2;
-            background: #a8a8a8;
-        }
-        
-        .control-group {
-            margin: 10px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            position: relative;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #cccac6;
-        }
-        
-        .button {
-            background: #a6a6a6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            margin-right: 10px;
-            margin-bottom: 20px;
-            transition: background 0.3s ease;
-        }
-        
-        .button:hover {
-            background: #808080;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        /* Custom volume meter slider styles */
-        .slider-container {
-            width: 100%;
-            position: relative;
-            margin: 25px 0;
-        }
-        
-        .volume-meter {
-            width: 100%;
-            height: 20px;
-            background: #404040;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        
-        .volume-level {
-            position: absolute;
-            height: 100%;
-            background: #4a90e2;
-            width: 0%;
-            transition: width 0.1s ease;
-        }
-        
-        .threshold-line {
-            position: absolute;
-            height: 100%;
-            width: 2px;
-            background: white;
-            top: 0;
-            z-index: 2;
-        }
-        
-        .threshold-label {
-            position: absolute;
-            top: -20px;
-            font-size: 12px;
-            color: white;
-            transform: translateX(-50%);
-        }
-        
-        input[type="range"] {
-            position: absolute;
-            width: 100%;
-            height: 20px;
-            -webkit-appearance: none;
-            background: transparent;
-            top: 0;
-            left: 0;
-            z-index: 3;
-            margin: 0;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 25px;
-            background: transparent;
-            cursor: pointer;
-        }
-        
-        input[type="number"] {
-            background: #404040;
-            color: #cccac6;
-            border: 1px solid #606060;
-            border-radius: 10px;
-            padding: 8px;
-            font-size: 16px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            width: 80px;
-            text-align: center;
-            margin-top: 5px;
-        }
-        
-        input[type="number"]:hover {
-            background: #505050;
-            border-color: #808080;
-        }
-        
-        input[type="number"]:focus {
-            background: #606060;
-            border-color: #a6a6a6;
-            outline: none;
-            box-shadow: 0 0 5px rgba(166, 166, 166, 0.8);
-        }
-        
-        select {
-            background: #404040;
-            color: #cccac6;
-            border: 1px solid #606060;
-            border-radius: 10px;
-            padding: 8px;
-            font-size: 16px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        
-        select:hover {
-            background: #505050;
-            border-color: #808080;
-        }
-        
-        select:focus {
-            background: #606060;
-            border-color: #a6a6a6;
-            outline: none;
-            box-shadow: 0 0 5px rgba(166, 166, 166, 0.8);
-        }
-        
-        .status {
-            padding: 10px;
-            background: #202020;
-            border-radius: 4px;
-            margin-top: 20px;
-            font-family: monospace;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .view-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            display: flex;
-            gap: 5px;
-        }
-        
-        .view-btn {
-            background-color: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .view-btn:hover {
-            background-color: rgba(0,0,0,0.7);
-        }
-        
-        :fullscreen .visualizer-container {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-        }
-        
-        :fullscreen .view-controls {
-            top: 20px;
-            right: 20px;
-        }
-		
-		.hunitsura {
-  font-size: 3rem;
-  font-weight: bold;
-  position: relative;
-  display: inline-block;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HuníTsura</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Averia+Sans+Libre:ital,wght@0,400;0,700;1,400&family=Averia+Gruesa+Libre&family=Syne+Mono&display=swap');
+
+:root{
+  --void:#15121c;        /* blurple-dark ground, never pure black */
+  --shell:#1e1a29;       /* compartment body */
+  --shell-2:#272235;     /* raised compartment */
+  --line:#3a3350;        /* hued hairline */
+  --ink:#e9e3d7;         /* warm parchment text */
+  --muted:#9a90ad;       /* dusty mauve-grey */
+  --amber:#f4b54c;       /* 45°  */
+  --aqua:#54e6c4;        /* 165° */
+  --blurple:#9a7bff;     /* 285° */
+  --hot:#ff5da2;         /* over-threshold pop */
+  --lime:#c7f25a;        /* sparing neon */
+  --irid:linear-gradient(100deg,var(--amber),var(--aqua),var(--blurple),var(--amber));
 }
 
-.hunitsura span {
-  position: relative;
-  z-index: 2; /* Ensures 'Tsura' stays on top */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(120% 90% at 80% -10%, #221b33 0%, transparent 55%),
+    radial-gradient(120% 90% at -10% 110%, #1a2230 0%, transparent 55%),
+    var(--void);
+  color:var(--ink);
+  font-family:'Averia Sans Libre',system-ui,sans-serif;
+  overflow-x:hidden;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
 }
 
-.hunitsura span::after {
-  content: "面";
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-size: 1.5em; /* Makes the 面 slightly larger */
-  color: rgba(0, 0, 0, 0.1); /* Light ghostly effect */
-  z-index: -1; /* Places it behind */
-  transform: translate(-10%, -10%);
+.shell{
+  max-width:880px;
+  margin:0 auto;
+  padding:clamp(14px,3vw,28px);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 
-    </style>
+/* ---------- title ---------- */
+.title-container{text-align:center;padding-top:8px}
+.title{
+  font-family:'Averia Gruesa Libre',cursive;
+  font-size:clamp(2.6em,9vw,3.6em);
+  line-height:.95;
+  margin:0;
+  position:relative;
+  display:inline-block;
+  background:var(--irid);
+  background-size:280% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  animation:drift 14s linear infinite;
+}
+.title span{position:relative;z-index:2}
+.title span::after{           /* the 面 ghost behind 'Tsura' */
+  content:"面";
+  position:absolute;left:0;top:0;
+  font-size:1.5em;
+  color:rgba(154,123,255,.14);
+  z-index:-1;
+  transform:translate(-12%,-14%);
+  -webkit-text-fill-color:rgba(154,123,255,.14);
+}
+.subtitle{
+  font-family:'Syne Mono',monospace;
+  font-size:.92em;letter-spacing:.12em;
+  color:var(--muted);
+  margin:6px 0 0;
+}
+@keyframes drift{to{background-position:280% 0}}
+
+/* ---------- viewport (the face) ---------- */
+.stage-frame{
+  position:relative;
+  padding:3px;
+  border-radius:34px 22px 30px 20px;
+  background:var(--irid);
+  background-size:300% 100%;
+  animation:drift 22s linear infinite;
+}
+.visualizer-container{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/10;
+  border-radius:32px 20px 28px 18px;
+  overflow:hidden;
+  background:#0e0c14;
+}
+.layer{position:absolute;inset:0;width:100%;height:100%}
+.layer img,.layer video,.layer iframe{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;border:0;display:block;
+}
+#layerA{background:#0e0c14}
+#layerB{background:#e9e3d7;opacity:0;mix-blend-mode:normal}
+
+.view-controls{
+  position:absolute;top:12px;right:12px;z-index:30;
+  display:flex;gap:8px;
+}
+.view-btn{
+  font-family:'Syne Mono',monospace;
+  background:rgba(20,16,28,.55);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  color:var(--ink);
+  border:1px solid rgba(233,227,215,.18);
+  border-radius:14px 10px 14px 10px;
+  padding:9px 13px;font-size:13px;cursor:pointer;
+  min-height:38px;
+  transition:transform .15s ease,background .2s ease;
+}
+.view-btn:hover{background:rgba(20,16,28,.78)}
+.view-btn:active{transform:scale(.95)}
+
+/* ---------- compartments ---------- */
+.panel{
+  background:var(--shell);
+  border:1px solid var(--line);
+  border-radius:28px 18px 26px 20px;
+  padding:clamp(14px,2.6vw,22px);
+}
+.panel-head{
+  font-family:'Syne Mono',monospace;
+  font-size:.74em;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.panel-head::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+label{display:block;color:var(--ink);font-size:.92em;margin-bottom:7px}
+.hint{color:var(--muted);font-size:.8em}
+
+/* form controls */
+select,input[type="text"],input[type="number"]{
+  font-family:'Averia Sans Libre',sans-serif;
+  background:var(--shell-2);
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:14px 10px 14px 10px;
+  padding:11px 13px;font-size:16px;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.45);
+  transition:border-color .2s ease,box-shadow .2s ease;
+  width:100%;
+}
+input[type="number"]{font-family:'Syne Mono',monospace;width:92px;text-align:center}
+select:focus,input:focus{
+  outline:none;border-color:var(--aqua);
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.45),0 0 0 3px rgba(84,230,196,.22);
+}
+:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+
+/* buttons */
+.btn{
+  font-family:'Averia Sans Libre',sans-serif;font-weight:700;
+  color:var(--void);
+  background:linear-gradient(180deg,#7ff0d8,var(--aqua) 60%,#36bfa0);
+  border:0;border-radius:18px 12px 18px 12px;
+  padding:12px 22px;font-size:16px;cursor:pointer;
+  min-height:46px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 6px 16px rgba(84,230,196,.18);
+  position:relative;overflow:hidden;
+  transition:transform .14s ease,filter .2s ease;
+}
+.btn::before{ /* glass bubble highlight — Frutiger Aero */
+  content:"";position:absolute;left:6%;right:6%;top:5%;height:42%;
+  border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,0));
+  pointer-events:none;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.ghost{
+  background:var(--shell-2);color:var(--ink);font-weight:400;
+  border:1px solid var(--line);
+  box-shadow:none;
+}
+.btn.ghost::before{display:none}
+.btn.live{background:linear-gradient(180deg,#ff9ac6,var(--hot) 60%,#e23b80);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 6px 16px rgba(255,93,162,.25)}
+
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.row > *{flex:1 1 auto}
+.btn-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+
+/* ---------- consolidated threshold meter ---------- */
+.meter-wrap{margin-top:8px}
+.meter-readout{
+  font-family:'Syne Mono',monospace;font-size:.82em;color:var(--muted);
+  display:flex;justify-content:space-between;margin-bottom:8px;
+}
+.meter-readout b{color:var(--aqua);font-weight:400}
+.meter{
+  position:relative;height:30px;
+  background:#100d18;
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  touch-action:none;
+  cursor:ew-resize;
+}
+.meter-band{ /* transformation zone between min & max */
+  position:absolute;top:0;bottom:0;
+  background:var(--irid);background-size:200% 100%;
+  opacity:.32;
+  animation:drift 8s linear infinite;
+}
+.meter-level{ /* live mic fill */
+  position:absolute;top:0;bottom:0;left:0;width:0%;
+  background:linear-gradient(90deg,rgba(84,230,196,.25),var(--aqua));
+  box-shadow:0 0 14px rgba(84,230,196,.5);
+}
+.meter-level.hot{background:linear-gradient(90deg,rgba(255,93,162,.25),var(--hot));box-shadow:0 0 16px rgba(255,93,162,.6)}
+.handle{
+  position:absolute;top:-4px;bottom:-4px;width:14px;
+  transform:translateX(-50%);
+  z-index:4;cursor:ew-resize;
+}
+.handle::before{
+  content:"";position:absolute;left:50%;top:0;bottom:0;width:3px;
+  transform:translateX(-50%);
+  background:var(--ink);
+  box-shadow:0 0 8px rgba(233,227,215,.6);
+}
+.handle::after{ /* grip cap */
+  content:"";position:absolute;left:50%;top:50%;width:16px;height:16px;
+  transform:translate(-50%,-50%);
+  border-radius:50% 40% 50% 40%;
+  background:linear-gradient(180deg,#fff,#c9c3d6);
+  box-shadow:0 1px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.9);
+}
+.handle.min::after{background:linear-gradient(180deg,#ffe6b0,var(--amber))}
+.handle.max::after{background:linear-gradient(180deg,#d7c4ff,var(--blurple))}
+.meter-fields{display:flex;gap:14px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.field{text-align:center}
+.field label{font-family:'Syne Mono',monospace;font-size:.72em;letter-spacing:.1em;color:var(--muted)}
+
+/* ---------- surfaces / drop ---------- */
+.surfaces{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.surface-card{
+  background:var(--shell-2);
+  border:1px solid var(--line);
+  border-radius:22px 16px 22px 16px;
+  padding:14px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.surface-card h4{margin:0;font-size:.95em;font-weight:700}
+.surface-card h4 .tag{font-family:'Syne Mono',monospace;font-size:.7em;color:var(--muted);font-weight:400;margin-left:6px}
+.drop-area{
+  border:2px dashed var(--line);
+  border-radius:16px;
+  padding:18px 12px;text-align:center;
+  color:var(--muted);font-size:.86em;
+  cursor:pointer;background:rgba(16,13,24,.4);
+  transition:border-color .2s ease,background .2s ease,color .2s ease;
+  min-height:78px;display:flex;align-items:center;justify-content:center;
+}
+.drop-area:hover{border-color:var(--aqua);color:var(--ink)}
+.drop-area.drag-over{border-color:var(--aqua);background:rgba(84,230,196,.1);color:var(--ink)}
+.drop-area.set{border-style:solid;border-color:var(--aqua);color:var(--aqua)}
+.yt-row{display:flex;gap:8px}
+.yt-row input{flex:1;font-size:14px;padding:9px 11px}
+.yt-row .btn{padding:9px 14px;min-height:auto;font-size:14px}
+
+/* ---------- status ---------- */
+.status{
+  font-family:'Syne Mono',monospace;font-size:.84em;
+  color:var(--muted);
+  background:var(--shell);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:11px 16px;
+  text-align:center;
+}
+.status b{color:var(--aqua);font-weight:400}
+
+/* ---------- window mode ---------- */
+body.window-mode .shell{max-width:none;width:100%;padding:0;gap:0}
+body.window-mode .title-container,
+body.window-mode .panel,
+body.window-mode .status{display:none}
+body.window-mode .stage-frame{padding:0;border-radius:0;animation:none;background:#0e0c14}
+body.window-mode .visualizer-container{border-radius:0;aspect-ratio:auto;height:100vh}
+
+:fullscreen .visualizer-container{border-radius:0;aspect-ratio:auto;width:100vw;height:100vh}
+.stage-frame:fullscreen{padding:0;background:#0e0c14;animation:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:560px){
+  .surfaces{grid-template-columns:1fr}
+  .row > *{flex:1 1 100%}
+  .visualizer-container{aspect-ratio:4/5}
+}
+@media (prefers-reduced-motion:reduce){
+  .title,.stage-frame,.meter-band{animation:none}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="title-container">
-            <h1 class="title hunitsura">Huní<span>Tsura</span></h1>
-            <p class="subtitle">Audio Reactive Visualizer</p>
-        </div>
-        
-        <div class="visualizer-container">
-            <img id="image1" src="">
-            <img id="image2" src="">
-            <div class="view-controls">
-                <button class="view-btn" id="windowModeBtn">⎔ Window</button>
-                <button class="view-btn" id="fullscreenBtn">⛶ Screen</button>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label for="audioSource">Audio Source:</label>
-                <select id="audioSource">
-                    <option value="">Select microphone...</option>
-                </select>
-                <button id="toggleAudio" class="button">Start</button>
-            </div>
-            
-            <!-- Min Threshold Control -->
-            <div class="control-group">
-                <label for="minDb">Minimum Threshold:</label>
-                <div class="slider-container">
-                    <div class="volume-meter" id="minVolumeMeter">
-                        <div class="volume-level" id="minVolumeLevel"></div>
-                        <div class="threshold-line" id="minThresholdLine">
-                            <div class="threshold-label">Threshold</div>
-                        </div>
-                        <input type="range" id="minDb" min="0" max="100" value="40" step="1">
-                    </div>
-                    <input type="number" id="minDbValue" min="-100" max="0" value="-60" step="1">
-                </div>
-            </div>
-            
-            <!-- Max Threshold Control -->
-            <div class="control-group">
-                <label for="maxDb">Maximum Threshold:</label>
-                <div class="slider-container">
-                    <div class="volume-meter" id="maxVolumeMeter">
-                        <div class="volume-level" id="maxVolumeLevel"></div>
-                        <div class="threshold-line" id="maxThresholdLine">
-                            <div class="threshold-label">Threshold</div>
-                        </div>
-                        <input type="range" id="maxDb" min="0" max="100" value="70" step="1">
-                    </div>
-                    <input type="number" id="maxDbValue" min="-100" max="0" value="-30" step="1">
-                </div>
-            </div>
-            
-            <div class="button-group">
-                <button id="swapImages" class="button">Swap Images</button>
-                <button id="resetImages" class="button">Reset Images</button>
-            </div>
-            
-            <div class="drop-area" id="dropArea1">
-                <p>Drag & drop Image 1 (background) here</p>
-            </div>
-            
-            <div class="drop-area" id="dropArea2">
-                <p>Drag & drop Image 2 (opacity controlled) here</p>
-            </div>
-            
-            <div class="status" id="status">
-                Status: Loading...
-            </div>
-        </div>
+<div class="shell">
+
+  <div class="title-container">
+    <h1 class="title">Huní<span>Tsura</span></h1>
+    <p class="subtitle">sound bleeds one surface through another</p>
+  </div>
+
+  <div class="stage-frame" id="stageFrame">
+    <div class="visualizer-container" id="stage">
+      <div class="layer" id="layerA"></div>
+      <div class="layer" id="layerB"></div>
+      <div class="view-controls">
+        <button class="view-btn" id="windowModeBtn">⎔ window</button>
+        <button class="view-btn" id="fullscreenBtn">⛶ screen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNAL -->
+  <div class="panel">
+    <p class="panel-head">signal</p>
+    <div class="row">
+      <div style="flex:2 1 200px">
+        <label for="audioSource">Microphone</label>
+        <select id="audioSource"><option value="">Select microphone…</option></select>
+      </div>
+      <div style="flex:0 0 auto">
+        <button id="toggleAudio" class="btn">Start</button>
+      </div>
     </div>
 
-    <script>
-        // DOM elements
-        const image1 = document.getElementById('image1');
-        const image2 = document.getElementById('image2');
-        const audioSourceSelect = document.getElementById('audioSource');
-        const toggleAudioBtn = document.getElementById('toggleAudio');
-        const minDbSlider = document.getElementById('minDb');
-        const maxDbSlider = document.getElementById('maxDb');
-        const minDbValue = document.getElementById('minDbValue');
-        const maxDbValue = document.getElementById('maxDbValue');
-        const swapImagesBtn = document.getElementById('swapImages');
-        const resetImagesBtn = document.getElementById('resetImages');
-        const dropArea1 = document.getElementById('dropArea1');
-        const dropArea2 = document.getElementById('dropArea2');
-        const statusEl = document.getElementById('status');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const windowModeBtn = document.getElementById('windowModeBtn');
-        const visualizerContainer = document.querySelector('.visualizer-container');
-        const minVolumeLevel = document.getElementById('minVolumeLevel');
-        const maxVolumeLevel = document.getElementById('maxVolumeLevel');
-        const minThresholdLine = document.getElementById('minThresholdLine');
-        const maxThresholdLine = document.getElementById('maxThresholdLine');
-        const controls = document.querySelector('.controls');
-        const titleContainer = document.querySelector('.title-container');
-        
-        // Audio context and variables
-        let audioContext;
-        let analyser;
-        let microphone;
-        let isAudioRunning = false;
-        let animationId;
-        let currentVolume = 0;
-        let isWindowMode = false;
-        
-        // Initialize
-        init();
-        
-        function init() {
-            // Set default black and white backgrounds
-            image1.style.backgroundColor = 'black';
-            image2.style.backgroundColor = 'white';
-            
-            // Link sliders and number inputs
-            minDbSlider.addEventListener('input', () => {
-                const dbValue = sliderToDb(minDbSlider.value);
-                minDbValue.value = dbValue;
-                minThresholdLine.style.left = minDbSlider.value + '%';
-            });
-            
-            minDbValue.addEventListener('input', () => {
-                const sliderValue = dbToSlider(minDbValue.value);
-                minDbSlider.value = sliderValue;
-                minThresholdLine.style.left = sliderValue + '%';
-            });
-            
-            maxDbSlider.addEventListener('input', () => {
-                const dbValue = sliderToDb(maxDbSlider.value);
-                maxDbValue.value = dbValue;
-                maxThresholdLine.style.left = maxDbSlider.value + '%';
-            });
-            
-            maxDbValue.addEventListener('input', () => {
-                const sliderValue = dbToSlider(maxDbValue.value);
-                maxDbSlider.value = sliderValue;
-                maxThresholdLine.style.left = sliderValue + '%';
-            });
-            
-            // Convert between slider position (0-100) and dB value (-100 to 0)
-            function dbToSlider(db) {
-                return ((parseFloat(db) + 100) / 100) * 100;
-            }
-            
-            function sliderToDb(slider) {
-                return ((parseFloat(slider) / 100) * 100) - 100;
-            }
-            
-            // Set initial positions
-            minThresholdLine.style.left = minDbSlider.value + '%';
-            maxThresholdLine.style.left = maxDbSlider.value + '%';
-            
-            // Swap images button
-            swapImagesBtn.addEventListener('click', () => {
-                const tempSrc = image1.src;
-                const tempBg = image1.style.backgroundColor;
-                
-                image1.src = image2.src;
-                image1.style.backgroundColor = image2.style.backgroundColor;
-                
-                image2.src = tempSrc;
-                image2.style.backgroundColor = tempBg;
-                
-                updateStatus('Images swapped');
-            });
-            
-            // Reset images button
-            resetImagesBtn.addEventListener('click', () => {
-                image1.src = '';
-                image2.src = '';
-                image1.style.backgroundColor = 'black';
-                image2.style.backgroundColor = 'white';
-                updateStatus('Images reset to default');
-            });
-            
-            // Set up drag and drop
-            setupDropZone(dropArea1, image1, 'Image 1 set');
-            setupDropZone(dropArea2, image2, 'Image 2 set');
-            
-            // Audio controls
-            toggleAudioBtn.addEventListener('click', toggleAudio);
-            
-            // View mode buttons
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            windowModeBtn.addEventListener('click', toggleWindowMode);
-            
-            // Request microphone permission and get devices on load
-            requestMicrophonePermission();
-            
-            // Start animation loop
-            animate();
-        }
-        
-        function toggleWindowMode() {
-            isWindowMode = !isWindowMode;
-            
-            if (isWindowMode) {
-                document.body.classList.add('window-mode');
-                windowModeBtn.textContent = "⬜ Normal";
-                updateStatus('Window mode activated');
-            } else {
-                document.body.classList.remove('window-mode');
-                windowModeBtn.textContent = "⎔ Window";
-                updateStatus('Normal view activated');
-            }
-        }
-        
-        function setupDropZone(dropZone, imageElement, successMessage) {
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('drag-over');
-            });
-            
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('drag-over');
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('drag-over');
-                
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.match('image.*')) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = (event) => {
-                        imageElement.src = event.target.result;
-                        imageElement.style.backgroundColor = '';
-                        updateStatus(successMessage);
-                    };
-                    
-                    reader.readAsDataURL(file);
-                } else {
-                    updateStatus('Please drop an image file');
-                }
-            });
-        }
-        
-        async function requestMicrophonePermission() {
-            try {
-                // First request permission by trying to access the microphone
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                // Immediately stop the stream (we just wanted permission)
-                stream.getTracks().forEach(track => track.stop());
-                
-                // Now get the actual devices list
-                await getAudioDevices();
-                updateStatus('Microphone access granted. Select a device and click Start.');
-            } catch (error) {
-                updateStatus('Microphone access denied: ' + error.message);
-                toggleAudioBtn.disabled = true;
-            }
-        }
-        
-        async function getAudioDevices() {
-            try {
-                // Wait for devices to be enumerated
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const audioDevices = devices.filter(device => device.kind === 'audioinput');
-                
-                // Clear existing options except the first one
-                while (audioSourceSelect.options.length > 1) {
-                    audioSourceSelect.remove(1);
-                }
-                
-                audioDevices.forEach(device => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Microphone ${audioSourceSelect.length}`;
-                    audioSourceSelect.appendChild(option);
-                });
-                
-                // Select the first device by default if there are options
-                if (audioDevices.length > 0) {
-                    audioSourceSelect.value = audioDevices[0].deviceId;
-                }
-            } catch (error) {
-                updateStatus('Error getting audio devices: ' + error.message);
-            }
-        }
-        
-        async function toggleAudio() {
-            if (isAudioRunning) {
-                stopAudio();
-                toggleAudioBtn.textContent = 'Start';
-                updateStatus('Audio stopped');
-            } else {
-                await startAudio();
-                toggleAudioBtn.textContent = 'Stop';
-                updateStatus('Audio started with ' + audioSourceSelect.options[audioSourceSelect.selectedIndex].text);
-            }
-        }
-        
-        async function startAudio() {
-            try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 256;
-                }
-                
-                const deviceId = audioSourceSelect.value;
-                const constraints = deviceId ? { audio: { deviceId: { exact: deviceId } } } : { audio: true };
-                
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                if (microphone) {
-                    microphone.disconnect();
-                }
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-                
-                isAudioRunning = true;
-            } catch (error) {
-                updateStatus('Error starting audio: ' + error.message);
-                isAudioRunning = false;
-                toggleAudioBtn.textContent = 'Start';
-            }
-        }
-        
-        function stopAudio() {
-            if (microphone) {
-                microphone.disconnect();
-            }
-            isAudioRunning = false;
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                visualizerContainer.requestFullscreen().catch(err => {
-                    updateStatus('Fullscreen error: ' + err.message);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-        
-        function animate() {
-            if (isAudioRunning && analyser) {
-                const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                analyser.getByteFrequencyData(dataArray);
-                
-                // Calculate average volume in dB
-                let sum = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i];
-                }
-                const average = sum / dataArray.length;
-                currentVolume = 20 * Math.log10(average / 255);
-                
-                // Update volume meters
-                updateVolumeMeter(minVolumeLevel, minDbValue.value, currentVolume);
-                updateVolumeMeter(maxVolumeLevel, maxDbValue.value, currentVolume);
-                
-                // Map dB to opacity for image2
-                const minDb = parseFloat(minDbValue.value);
-                const maxDb = parseFloat(maxDbValue.value);
-                
-                let opacity = 0;
-                if (currentVolume > minDb) {
-                    opacity = (currentVolume - minDb) / (maxDb - minDb);
-                    opacity = Math.max(0, Math.min(1, opacity)); // Clamp between 0 and 1
-                }
-                
-                image2.style.opacity = opacity;
-            }
-            
-            animationId = requestAnimationFrame(animate);
-        }
-        
-        function updateVolumeMeter(meterElement, thresholdDb, currentDb) {
-            // Show volume level relative to this threshold
-            const thresholdValue = parseFloat(thresholdDb);
-            const volumePercentage = Math.min(100, Math.max(0, ((currentDb + 100) / 100) * 100));
-            const thresholdPercentage = ((thresholdValue + 100) / 100) * 100;
-            
-            // Fill the meter up to the current volume level
-            meterElement.style.width = volumePercentage + '%';
-            
-            // Change color based on whether current volume exceeds threshold
-            if (currentDb > thresholdValue) {
-                meterElement.style.backgroundColor = '#ff4d4d'; // Red when exceeded
-            } else {
-                meterElement.style.backgroundColor = '#4a90e2'; // Blue when below
-            }
-        }
-        
-        function updateStatus(message) {
-            statusEl.textContent = 'Status: ' + message;
-        }
-        
-        // Clean up on page unload
-        window.addEventListener('beforeunload', () => {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            stopAudio();
-            if (audioContext) {
-                audioContext.close();
-            }
-        });
-    </script>
+    <div class="meter-wrap">
+      <div class="meter-readout">
+        <span>level <b id="levelReadout">—</b></span>
+        <span id="crossReadout">overlay 0%</span>
+      </div>
+      <div class="meter" id="meter">
+        <div class="meter-band" id="meterBand"></div>
+        <div class="meter-level" id="meterLevel"></div>
+        <div class="handle min" id="handleMin"></div>
+        <div class="handle max" id="handleMax"></div>
+      </div>
+      <div class="meter-fields">
+        <div class="field">
+          <label for="minDbValue">min dB</label>
+          <input type="number" id="minDbValue" min="-100" max="0" value="-60" step="1">
+        </div>
+        <div class="field">
+          <label for="maxDbValue">max dB</label>
+          <input type="number" id="maxDbValue" min="-100" max="0" value="-30" step="1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESPONSE -->
+  <div class="panel">
+    <p class="panel-head">response</p>
+    <div class="row">
+      <div>
+        <label for="smoothing">Smoothing <span class="hint" id="smoothOut">0.40</span></label>
+        <input type="range" id="smoothing" min="0" max="1" step="0.01" value="0.4" style="width:100%">
+      </div>
+      <div>
+        <label for="curve">Curve <span class="hint" id="curveOut">linear</span></label>
+        <input type="range" id="curve" min="-1" max="1" step="0.05" value="0" style="width:100%">
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div>
+        <label for="blend">Blend</label>
+        <select id="blend">
+          <option value="normal">normal</option>
+          <option value="screen">screen</option>
+          <option value="multiply">multiply</option>
+          <option value="overlay">overlay</option>
+          <option value="difference">difference</option>
+          <option value="exclusion">exclusion</option>
+          <option value="lighten">lighten</option>
+          <option value="darken">darken</option>
+          <option value="hard-light">hard light</option>
+          <option value="color-dodge">color dodge</option>
+        </select>
+      </div>
+      <div>
+        <label for="invert">Direction</label>
+        <select id="invert">
+          <option value="0">louder → overlay appears</option>
+          <option value="1">louder → overlay vanishes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- SURFACES -->
+  <div class="panel">
+    <p class="panel-head">surfaces</p>
+    <div class="surfaces">
+      <div class="surface-card">
+        <h4>Base <span class="tag">underneath</span></h4>
+        <div class="drop-area" id="dropA">Tap or drop image / video</div>
+        <div class="yt-row">
+          <input type="text" id="ytA" placeholder="…or paste a YouTube link">
+          <button class="btn" data-yt="A">Load</button>
+        </div>
+      </div>
+      <div class="surface-card">
+        <h4>Overlay <span class="tag">sound-driven</span></h4>
+        <div class="drop-area" id="dropB">Tap or drop image / video</div>
+        <div class="yt-row">
+          <input type="text" id="ytB" placeholder="…or paste a YouTube link">
+          <button class="btn" data-yt="B">Load</button>
+        </div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button id="swap" class="btn ghost">Swap surfaces</button>
+      <button id="reset" class="btn ghost">Reset surfaces</button>
+    </div>
+  </div>
+
+  <div class="status" id="status">Status: <b>loading…</b></div>
+</div>
+
+<!-- hidden file inputs -->
+<input type="file" id="fileA" accept="image/*,video/*" hidden>
+<input type="file" id="fileB" accept="image/*,video/*" hidden>
+
+<script>
+"use strict";
+
+/* ---------- elements ---------- */
+const $ = id => document.getElementById(id);
+const layerA = $('layerA'), layerB = $('layerB');
+const audioSourceSelect = $('audioSource');
+const toggleAudioBtn = $('toggleAudio');
+const minDbValue = $('minDbValue'), maxDbValue = $('maxDbValue');
+const meter = $('meter'), meterBand = $('meterBand'), meterLevel = $('meterLevel');
+const handleMin = $('handleMin'), handleMax = $('handleMax');
+const levelReadout = $('levelReadout'), crossReadout = $('crossReadout');
+const smoothing = $('smoothing'), smoothOut = $('smoothOut');
+const curve = $('curve'), curveOut = $('curveOut');
+const blendSel = $('blend'), invertSel = $('invert');
+const statusEl = $('status');
+const stage = $('stage'), stageFrame = $('stageFrame');
+const fullscreenBtn = $('fullscreenBtn'), windowModeBtn = $('windowModeBtn');
+
+/* ---------- audio state ---------- */
+let audioContext, analyser, microphone, dataArray;
+let isAudioRunning = false, animationId = null;
+let currentVolume = -100;
+let displayedOpacity = 0;        // smoothed value driving the overlay
+let isWindowMode = false;
+
+/* ---------- layer media model ---------- */
+// each layer: {type:'none'|'image'|'video'|'youtube', src, objectUrl}
+const media = { A:{type:'none',objectUrl:null}, B:{type:'none',objectUrl:null} };
+const layerEl = { A:layerA, B:layerB };
+
+/* dB <-> percent (0..100) over a -100..0 range */
+const dbToPct = db => Math.max(0, Math.min(100, parseFloat(db) + 100));
+const pctToDb = pct => Math.round(Math.max(0, Math.min(100, pct)) - 100);
+
+init();
+
+function init(){
+  // meter handles initial position
+  layoutHandles();
+
+  minDbValue.addEventListener('input', clampFields);
+  maxDbValue.addEventListener('input', clampFields);
+  minDbValue.addEventListener('change', () => { clampFields(); layoutHandles(); });
+  maxDbValue.addEventListener('change', () => { clampFields(); layoutHandles(); });
+
+  setupMeterDrag();
+
+  smoothing.addEventListener('input', () => smoothOut.textContent = (+smoothing.value).toFixed(2));
+  curve.addEventListener('input', () => {
+    const v = +curve.value;
+    curveOut.textContent = Math.abs(v) < 0.03 ? 'linear' : (v > 0 ? 'late ' + v.toFixed(2) : 'early ' + v.toFixed(2));
+  });
+  blendSel.addEventListener('change', () => { layerB.style.mixBlendMode = blendSel.value; });
+
+  // file pickers
+  wireDrop('A', 'dropA', 'fileA');
+  wireDrop('B', 'dropB', 'fileB');
+
+  // youtube load buttons
+  document.querySelectorAll('[data-yt]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slot = btn.getAttribute('data-yt');
+      const url = $('yt' + slot).value.trim();
+      const vid = parseYouTube(url);
+      if (!vid){ setStatus('Could not read that YouTube link'); return; }
+      setLayer(slot, 'youtube', vid);
+      $('drop' + slot).classList.add('set');
+      $('drop' + slot).textContent = 'YouTube loaded — tap to replace';
+      setStatus((slot === 'A' ? 'Base' : 'Overlay') + ' set to YouTube');
+    });
+  });
+
+  $('swap').addEventListener('click', swapSurfaces);
+  $('reset').addEventListener('click', resetSurfaces);
+  toggleAudioBtn.addEventListener('click', toggleAudio);
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+  windowModeBtn.addEventListener('click', toggleWindowMode);
+
+  requestMicrophonePermission();
+}
+
+/* ---------- threshold fields & handles ---------- */
+function clampFields(){
+  let mn = parseFloat(minDbValue.value);
+  let mx = parseFloat(maxDbValue.value);
+  if (isNaN(mn)) mn = -60;
+  if (isNaN(mx)) mx = -30;
+  if (mn >= mx) mn = mx - 1;
+  minDbValue.value = Math.round(mn);
+  maxDbValue.value = Math.round(mx);
+}
+function layoutHandles(){
+  const mn = dbToPct(minDbValue.value), mx = dbToPct(maxDbValue.value);
+  handleMin.style.left = mn + '%';
+  handleMax.style.left = mx + '%';
+  meterBand.style.left = mn + '%';
+  meterBand.style.width = (mx - mn) + '%';
+}
+function setupMeterDrag(){
+  let active = null;
+  const rect = () => meter.getBoundingClientRect();
+  const start = (which) => (e) => { active = which; e.preventDefault(); move(e); };
+  const move = (e) => {
+    if (!active) return;
+    const r = rect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    let pct = Math.max(0, Math.min(100, (x / r.width) * 100));
+    if (active === 'min'){
+      const maxPct = dbToPct(maxDbValue.value);
+      pct = Math.min(pct, maxPct - 1);
+      minDbValue.value = pctToDb(pct);
+    } else {
+      const minPct = dbToPct(minDbValue.value);
+      pct = Math.max(pct, minPct + 1);
+      maxDbValue.value = pctToDb(pct);
+    }
+    layoutHandles();
+  };
+  const end = () => { active = null; };
+
+  handleMin.addEventListener('pointerdown', start('min'));
+  handleMax.addEventListener('pointerdown', start('max'));
+  // tap on empty meter moves the nearest handle
+  meter.addEventListener('pointerdown', (e) => {
+    if (e.target === handleMin || e.target === handleMax) return;
+    const r = rect();
+    const pct = ((e.clientX - r.left) / r.width) * 100;
+    const dMin = Math.abs(pct - dbToPct(minDbValue.value));
+    const dMax = Math.abs(pct - dbToPct(maxDbValue.value));
+    start(dMin < dMax ? 'min' : 'max')(e);
+  });
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
+}
+
+/* ---------- media handling ---------- */
+function wireDrop(slot, dropId, fileId){
+  const drop = $(dropId), input = $(fileId);
+  drop.addEventListener('click', () => input.click());
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(slot, e.dataTransfer.files[0]);
+  });
+  input.addEventListener('change', () => { if (input.files[0]) handleFile(slot, input.files[0]); });
+}
+
+function handleFile(slot, file){
+  const drop = $('drop' + slot);
+  if (file.type.startsWith('image/')) {
+    setLayer(slot, 'image', URL.createObjectURL(file));
+  } else if (file.type.startsWith('video/')) {
+    setLayer(slot, 'video', URL.createObjectURL(file));
+  } else {
+    setStatus('Drop an image or a video file');
+    return;
+  }
+  drop.classList.add('set');
+  drop.textContent = file.name.length > 24 ? file.name.slice(0,22) + '…' : file.name;
+  setStatus((slot === 'A' ? 'Base' : 'Overlay') + ' set');
+}
+
+function setLayer(slot, type, src){
+  // revoke any previous object URL
+  if (media[slot].objectUrl){ URL.revokeObjectURL(media[slot].objectUrl); media[slot].objectUrl = null; }
+  const el = layerEl[slot];
+  el.innerHTML = '';
+  let node;
+  if (type === 'image'){
+    node = document.createElement('img');
+    node.src = src;
+    media[slot].objectUrl = src.startsWith('blob:') ? src : null;
+  } else if (type === 'video'){
+    node = document.createElement('video');
+    node.src = src; node.loop = true; node.muted = true;
+    node.autoplay = true; node.playsInline = true;
+    node.setAttribute('playsinline','');
+    node.play().catch(()=>{});
+    media[slot].objectUrl = src.startsWith('blob:') ? src : null;
+  } else if (type === 'youtube'){
+    node = document.createElement('iframe');
+    node.src = `https://www.youtube.com/embed/${src}?autoplay=1&mute=1&loop=1&playlist=${src}&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1`;
+    node.allow = 'autoplay; encrypted-media';
+    node.setAttribute('frameborder','0');
+  }
+  if (node) el.appendChild(node);
+  media[slot].type = type;
+  media[slot].src = src;
+  // overlay keeps its blend mode; base never blends
+  if (slot === 'B') layerB.style.mixBlendMode = blendSel.value;
+}
+
+function parseYouTube(url){
+  if (!url) return null;
+  if (/^[\w-]{11}$/.test(url)) return url;
+  const m = url.match(/(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+function swapSurfaces(){
+  const a = { ...media.A }, b = { ...media.B };
+  // detach object-url ownership tracking during swap (URLs stay valid)
+  media.A.objectUrl = null; media.B.objectUrl = null;
+  setLayerRaw('A', b);
+  setLayerRaw('B', a);
+  setStatus('Surfaces swapped');
+}
+function setLayerRaw(slot, m){
+  if (m.type === 'none'){ layerEl[slot].innerHTML = ''; media[slot] = {type:'none',objectUrl:null}; return; }
+  setLayer(slot, m.type, m.src);
+  media[slot].objectUrl = m.objectUrl;
+}
+
+function resetSurfaces(){
+  ['A','B'].forEach(slot => {
+    if (media[slot].objectUrl) URL.revokeObjectURL(media[slot].objectUrl);
+    layerEl[slot].innerHTML = '';
+    media[slot] = {type:'none',objectUrl:null};
+    const d = $('drop' + slot);
+    d.classList.remove('set');
+    d.textContent = 'Tap or drop image / video';
+    $('yt' + slot).value = '';
+  });
+  layerB.style.opacity = 0;
+  displayedOpacity = 0;
+  setStatus('Surfaces reset');
+}
+
+/* ---------- audio ---------- */
+async function requestMicrophonePermission(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(t => t.stop());
+    await getAudioDevices();
+    setStatus('Mic ready — pick a source and press Start');
+  }catch(err){
+    setStatus('Microphone blocked: ' + err.message);
+    toggleAudioBtn.disabled = true;
+  }
+}
+async function getAudioDevices(){
+  try{
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter(d => d.kind === 'audioinput');
+    while (audioSourceSelect.options.length > 1) audioSourceSelect.remove(1);
+    inputs.forEach((d,i) => {
+      const o = document.createElement('option');
+      o.value = d.deviceId;
+      o.text = d.label || ('Microphone ' + (i+1));
+      audioSourceSelect.appendChild(o);
+    });
+    if (inputs.length) audioSourceSelect.value = inputs[0].deviceId;
+  }catch(err){ setStatus('Could not list devices: ' + err.message); }
+}
+async function toggleAudio(){
+  if (isAudioRunning){
+    stopAudio();
+    toggleAudioBtn.textContent = 'Start';
+    toggleAudioBtn.classList.remove('live');
+    setStatus('Stopped');
+  } else {
+    await startAudio();
+    if (isAudioRunning){
+      toggleAudioBtn.textContent = 'Stop';
+      toggleAudioBtn.classList.add('live');
+      const sel = audioSourceSelect.options[audioSourceSelect.selectedIndex];
+      setStatus('Listening — ' + (sel ? sel.text : 'default'));
+    }
+  }
+}
+async function startAudio(){
+  try{
+    if (!audioContext){
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.7;
+      dataArray = new Uint8Array(analyser.frequencyBinCount); // allocate once
+    }
+    if (audioContext.state === 'suspended') await audioContext.resume();
+    const id = audioSourceSelect.value;
+    const constraints = id ? {audio:{deviceId:{exact:id}}} : {audio:true};
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (microphone) microphone.disconnect();
+    microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    isAudioRunning = true;
+    if (!animationId) animate();
+  }catch(err){
+    setStatus('Could not start audio: ' + err.message);
+    isAudioRunning = false;
+  }
+}
+function stopAudio(){
+  if (microphone) microphone.disconnect();
+  isAudioRunning = false;
+  if (animationId){ cancelAnimationFrame(animationId); animationId = null; }
+}
+
+/* ---------- render loop (only runs while listening) ---------- */
+function animate(){
+  if (!isAudioRunning){ animationId = null; return; }
+  analyser.getByteFrequencyData(dataArray);
+
+  let sum = 0;
+  for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+  const average = sum / dataArray.length;
+  currentVolume = average > 0 ? 20 * Math.log10(average / 255) : -100;
+
+  const minDb = parseFloat(minDbValue.value);
+  const maxDb = parseFloat(maxDbValue.value);
+
+  // target opacity from level, with curve + direction
+  let target = 0;
+  if (currentVolume > minDb && maxDb > minDb){
+    target = (currentVolume - minDb) / (maxDb - minDb);
+    target = Math.max(0, Math.min(1, target));
+    const gamma = Math.pow(3, parseFloat(curve.value)); // -1..1 -> 1/3..3
+    target = Math.pow(target, gamma);
+  }
+  if (invertSel.value === '1') target = 1 - target;
+
+  // smoothing (organic, non-stepped)
+  const s = parseFloat(smoothing.value);
+  const k = 1 - s * 0.94;            // s=0 -> instant, s=1 -> very smooth
+  displayedOpacity += (target - displayedOpacity) * k;
+  layerB.style.opacity = displayedOpacity.toFixed(3);
+
+  // meter visuals
+  const lvlPct = dbToPct(currentVolume);
+  meterLevel.style.width = lvlPct + '%';
+  const over = currentVolume > minDb;
+  meterLevel.classList.toggle('hot', over);
+  levelReadout.textContent = (currentVolume <= -100 ? '−∞' : currentVolume.toFixed(1)) + ' dB';
+  crossReadout.textContent = 'overlay ' + Math.round(displayedOpacity * 100) + '%';
+
+  animationId = requestAnimationFrame(animate);
+}
+
+/* ---------- view modes ---------- */
+function toggleWindowMode(){
+  isWindowMode = !isWindowMode;
+  document.body.classList.toggle('window-mode', isWindowMode);
+  windowModeBtn.textContent = isWindowMode ? '⬜ normal' : '⎔ window';
+  setStatus(isWindowMode ? 'Window mode' : 'Normal view');
+}
+function toggleFullscreen(){
+  if (!document.fullscreenElement){
+    stageFrame.requestFullscreen().catch(err => setStatus('Fullscreen blocked: ' + err.message));
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function setStatus(msg){ statusEl.innerHTML = 'Status: <b>' + msg + '</b>'; }
+
+window.addEventListener('beforeunload', () => {
+  if (animationId) cancelAnimationFrame(animationId);
+  stopAudio();
+  ['A','B'].forEach(s => { if (media[s].objectUrl) URL.revokeObjectURL(media[s].objectUrl); });
+  if (audioContext) audioContext.close();
+});
+</script>
 </body>
 </html>
