@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>HuniTsura favicon</title>
+  <defs>
+    <linearGradient id="rim" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f4b54c"/>
+      <stop offset=".38" stop-color="#54e6c4"/>
+      <stop offset=".72" stop-color="#9a7bff"/>
+      <stop offset="1" stop-color="#ff5da2"/>
+    </linearGradient>
+    <radialGradient id="face" cx="30" cy="25" r="31" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2b2540"/>
+      <stop offset="1" stop-color="#15121c"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#15121c"/>
+  <circle cx="32" cy="32" r="23" fill="url(#face)" stroke="url(#rim)" stroke-width="4"/>
+  <circle cx="24" cy="28" r="4" fill="#54e6c4"/>
+  <circle cx="40" cy="28" r="4" fill="#f4b54c"/>
+  <path d="M19 40c4-5 9-8 13-8s9 3 13 8" fill="none" stroke="#e9e3d7" stroke-width="4" stroke-linecap="round"/>
+  <path d="M15 18c7 4 12 4 17 0s10-4 17 0" fill="none" stroke="url(#rim)" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+</svg>
